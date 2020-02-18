@@ -1,0 +1,4 @@
+A	activates	B
+B	inhibits	D
+A	inhibits	C
+C	activates	E
