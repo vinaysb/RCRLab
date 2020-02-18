@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Contains the code to carry-out reverse causal reasoning."""
 
 import random
@@ -11,7 +13,7 @@ from statsmodels.stats.multitest import multipletests
 
 def do_rcr(
         kam_path: str,
-        data: Optional = None,
+        data: str = None,
         method: Optional[str] = 'fdr_bh'
 ) -> List[Tuple]:
     """
