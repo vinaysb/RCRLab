@@ -146,7 +146,7 @@ def calculate_probability(
                 num_of_positives += 1
 
     flat_hyp = set([node for branch in hyp for node in branch])
-    return binom.pmf(num_of_positives, len(flat_hyp) + 1 - num_of_ambiguous, 0.5)
+    return binom.pmf(num_of_positives, len(flat_hyp) - num_of_ambiguous, 0.5)
 
 
 def _list_split(
