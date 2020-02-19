@@ -33,5 +33,5 @@ class TestDfsRcr(unittest.TestCase):
                 hyp,
                 upstream
             ),
-            0.15624999999999994
+            0.25000000000000006
         )
