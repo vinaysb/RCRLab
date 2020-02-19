@@ -174,7 +174,3 @@ def _list_split(
     final.remove([])
 
     return final
-
-
-if __name__ == '__main__':
-    print(do_rcr('test.tsv'))
