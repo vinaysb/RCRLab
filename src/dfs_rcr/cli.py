@@ -6,7 +6,7 @@ import logging
 
 import click
 
-from .RCR import do_rcr
+from dfs_rcr.RCR import do_rcr
 
 logger = logging.getLogger(__name__)
 
@@ -14,13 +14,13 @@ logger = logging.getLogger(__name__)
 @click.command()
 @click.option(
     '--kam-path',
-    help="Path to the Knowledge assembly model as a TSV file.",
+    help="Path to the Knowledge assembly model as a TSV file",
     type=click.Path(file_okay=True, dir_okay=False, exists=True),
     required=True,
 )
 @click.option(
     '--data-path',
-    help="Path to the gene expression data as a TSV file.",
+    help="Path to the gene expression data as a TSV file",
     type=click.Path(file_okay=True, dir_okay=False, exists=True),
     required=True,
 )
@@ -32,7 +32,6 @@ logger = logging.getLogger(__name__)
     default='fdr_bh',
     show_default=True,
 )
-@click.pass_context
 def cli(
         kam_path: str,
         data_path: str,
