@@ -14,6 +14,7 @@ from statsmodels.stats.multitest import multipletests
 def do_rcr(
         kam_path: str,
         data: str = None,
+        threshold: float = 2.5,
         method: Optional[str] = 'fdr_bh'
 ) -> List[Tuple]:
     """
@@ -21,6 +22,7 @@ def do_rcr(
     :param kam_path: Path to the file containing the source, relationship and the target nodes of a knowledge
     assembly model (KAM).
     :param data: Placeholder for the data that will be overlaid on the KAM.
+    :param threshold: Threshold for the Log-FC value.
     :param method: Method used for testing and adjustment of pvalues.
     :return: Concordance values for each hyp which are identified by their respective upstream node.
     """
@@ -29,7 +31,7 @@ def do_rcr(
     kam = generate_kam(kam_path)
 
     # Overlay the data on the KAM
-    # mixed_model = overlay_data(kam)
+    # mixed_model = overlay_data(kam, data, threshold)
     mixed_model = overlay_random_data(kam)
 
     results = []
@@ -93,21 +95,41 @@ def hyp_generator(
 
     for node in mixed_model.nodes:
         # Split the generated dfs into a list of lists based on the node
-        yield (node, _list_split(list(nx.edge_dfs(mixed_model, node)), node))
+        yield node, _list_split(list(nx.edge_dfs(mixed_model, node)), node)
 
 
 def overlay_data(
         kam: nx.DiGraph,
-        data: pd.DataFrame
+        data: pd.DataFrame,
+        threshold: float = 2.5
 ) -> nx.DiGraph:
     """
     Overlays the data by assigning the nodes in the KAM with either '+1', '-1' or '0' based on the data.
     :param kam: NetworkX DiGraph containing the KAM.
     :param data: Data containing either up or down-regulation of the nodes in the KAM.
+    :param threshold: Threshold for the Log-FC value.
     :return: NetworkX DiGraph containing the KAM & the information from the data in the form of node attribute.
     """
 
-    return NotImplemented
+    mixed_model = kam.copy()
+
+    for row in data.index:
+        if data.at[row, 'gene'] in mixed_model.nodes:
+            node = data.at[row, 'gene']
+            fc_val = data.at[row, 'fc_val']
+
+            # Check if the fold change value is greater than the threshold and assign either +1, -1 or 0 for up,
+            # down or ambiguously regulated nodes
+            if fc_val > threshold:
+                regulation = 1
+            elif fc_val < -1:
+                regulation = -1
+            else:
+                regulation = 0
+
+            mixed_model.nodes[node]["regulation"] = regulation
+
+    return mixed_model
 
 
 def overlay_random_data(
@@ -119,14 +141,16 @@ def overlay_random_data(
     :return: NetworkX DiGraph containing the KAM & the information from the data in the form of node attribute.
     """
 
-    for node in kam.nodes:
+    mixed_model = kam.copy()
+
+    for node in mixed_model.nodes:
         # For all chemicals the node attribute is ambiguous
         if node.startswith('CHEBI'):
-            kam.nodes[node]["regulation"] = 0
+            mixed_model.nodes[node]["regulation"] = 0
         else:
-            kam.nodes[node]["regulation"] = random.choice([1, -1, 0])
+            mixed_model.nodes[node]["regulation"] = random.choice([1, -1, 0])
 
-    return kam
+    return mixed_model
 
 
 def calculate_point_probability(
