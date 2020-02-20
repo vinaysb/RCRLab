@@ -1,6 +1,5 @@
 import unittest
-import networkx as nx
-import networkx.algorithms.isomorphism as iso
+import pandas as pd
 
 import dfs_rcr
 
@@ -17,11 +16,17 @@ TEST_HYP_PATH = os.path.join(HERE, 'test_hyp.pkl')
 class TestDfsRcr(unittest.TestCase):
 
     def test_generate_kam(self):
-        graph = pickle.load(open(TEST_GRAPH_PATH, 'rb'))
+        real_data = pd.read_csv(TEST_DATA_PATH, sep='\t', header=None)
+        pred_data = dfs_rcr.RCR.generate_kam(TEST_DATA_PATH)
 
-        em = iso.numerical_edge_match('Relationship', 1)
+        real_nodes = set(list(real_data[0].values) + list(real_data[2].values))
+        pred_nodes = set(pred_data.nodes)
 
-        self.assertTrue(nx.is_isomorphic(dfs_rcr.RCR.generate_kam(TEST_DATA_PATH), graph, em))
+        real_edges = set((i, j) for i, j in zip(real_data[0].values, real_data[2].values))
+        pred_edges = set(pred_data.edges)
+
+        self.assertSetEqual(pred_nodes, real_nodes)
+        self.assertSetEqual(pred_edges, real_edges)
 
     def test_calculate_probability(self):
         mixed_model = pickle.load(open(TEST_MIXED_MODEL_PATH, 'rb'))
